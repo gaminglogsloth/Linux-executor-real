@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sober External Executor</title>
+    <style>
+        body { font-family: monospace; background: #1a1a1a; color: #fff; padding: 20px; }
+        textarea { width: 100%; height: 150px; background: #2d2d2d; color: #0f0; border: 1px solid #444; padding: 10px; }
+        button { margin-top: 10px; padding: 10px 20px; cursor: pointer; }
+        #output { margin-top: 20px; white-space: pre-wrap; color: #aaa; background: #111; padding: 10px; min-height: 50px; }
+    </style>
+</head>
+<body>
+    <h2>Sober External Interface</h2>
+    <textarea id="code" placeholder="print('Hello from Sober!')"></textarea>
+    <button onclick="execute()">Run Code</button>
+    <div id="output">Output will appear here...</div>
+
+    <script>
+        // Sober's default local API endpoint
+        const SOBER_URL = 'http://127.0.0.1:6463'; 
+
+        async function execute() {
+            const code = document.getElementById('code').value;
+            const outputDiv = document.getElementById('output');
+            
+            outputDiv.innerText = "Sending...";
+
+            try {
+                // Sober expects a POST request with JSON body
+                const response = await fetch(`${SOBER_URL}/execute`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code })
+                });
+
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const data = await response.json();
+                
+                // Sober usually returns an object with 'result' or similar
+                // Check Sober's docs for exact return structure, but typically:
+                outputDiv.innerText = JSON.stringify(data, null, 2);
+            } catch (err) {
+                outputDiv.innerText = "Error: " + err.message + "\n\nMake sure Sober is injected and running.";
+            }
+        }
+    </script>
+</body>
+</html>
